@@ -4,7 +4,7 @@ A kid-friendly schedule clock built on a **Wemos D1 Mini (ESP8266)** with a 16×
 
 ![Built Kid Clock](docs/assets/kid-clock.png)
 
-![Kid Clock web UI](docs/assets/kid-clock-web-ui.png)
+![Kid Clock web UI — dark and light themes](docs/assets/kid-clock-web-ui.gif)
 
 ## Features
 
