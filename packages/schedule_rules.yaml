@@ -1,0 +1,1319 @@
+# Schedule rule engine — up to 10 time-window rules (ESP8266).
+#
+# Each rule: start and end time, priority, display mode,
+# message, and LED states. When no rule matches, line 2 shows the greeting and LEDs are off.
+#
+# Display modes: 0 = full message line, 1 = greeting (prefix + name), 2 = alternate greeting/message
+
+globals:
+  - id: sched_active_rule
+    type: int
+    initial_value: "-1"
+  - id: sched_display_mode
+    type: int
+    initial_value: "0"
+  - id: sched_green_on
+    type: bool
+    initial_value: "false"
+  - id: sched_red_on
+    type: bool
+    initial_value: "false"
+
+number:
+  - platform: template
+    name: "Alternate Seconds"
+    id: alternate_seconds
+    optimistic: true
+    restore_value: true
+    initial_value: ${default_alternate_seconds}
+    min_value: 2
+    max_value: 60
+    step: 1
+    mode: slider
+    icon: "mdi:swap-horizontal"
+    unit_of_measurement: s
+    web_server:
+      sorting_group_id: grp_display
+      sorting_weight: 2
+
+  # Rule 1 — default wake window
+  - platform: template
+    name: "Rule 1 Enabled"
+    id: rule_0_enabled
+    optimistic: true
+    restore_value: true
+    initial_value: ${default_rule_0_enabled}
+    min_value: 0
+    max_value: 1
+    step: 1
+    mode: box
+    web_server:
+      sorting_group_id: grp_rule_1
+      sorting_weight: 1
+  - platform: template
+    name: "Rule 1 Start Minute Of Day"
+    id: rule_0_start_mins
+    optimistic: true
+    restore_value: true
+    initial_value: ${default_rule_0_start_mins}
+    min_value: 0
+    max_value: 1439
+    step: 1
+    mode: box
+    web_server:
+      sorting_group_id: grp_rule_1
+      sorting_weight: 2
+  - platform: template
+    name: "Rule 1 End Minute Of Day"
+    id: rule_0_end_mins
+    optimistic: true
+    restore_value: true
+    initial_value: ${default_rule_0_end_mins}
+    min_value: 0
+    max_value: 1439
+    step: 1
+    mode: box
+    web_server:
+      sorting_group_id: grp_rule_1
+      sorting_weight: 3
+  - platform: template
+    name: "Rule 1 Priority"
+    id: rule_0_priority
+    optimistic: true
+    restore_value: true
+    initial_value: ${default_rule_0_priority}
+    min_value: 1
+    max_value: 99
+    step: 1
+    mode: box
+    web_server:
+      sorting_group_id: grp_rule_1
+      sorting_weight: 4
+  - platform: template
+    name: "Rule 1 Display Mode"
+    id: rule_0_display_mode
+    optimistic: true
+    restore_value: true
+    initial_value: ${default_rule_0_display_mode}
+    min_value: 0
+    max_value: 2
+    step: 1
+    mode: box
+    web_server:
+      sorting_group_id: grp_rule_1
+      sorting_weight: 5
+  - platform: template
+    name: "Rule 1 Green LED"
+    id: rule_0_green
+    optimistic: true
+    restore_value: true
+    initial_value: ${default_rule_0_green}
+    min_value: 0
+    max_value: 1
+    step: 1
+    mode: box
+    web_server:
+      sorting_group_id: grp_rule_1
+      sorting_weight: 6
+  - platform: template
+    name: "Rule 1 Red LED"
+    id: rule_0_red
+    optimistic: true
+    restore_value: true
+    initial_value: ${default_rule_0_red}
+    min_value: 0
+    max_value: 1
+    step: 1
+    mode: box
+    web_server:
+      sorting_group_id: grp_rule_1
+      sorting_weight: 7
+
+  # Rule 2 — default sleep window
+  - platform: template
+    name: "Rule 2 Enabled"
+    id: rule_1_enabled
+    optimistic: true
+    restore_value: true
+    initial_value: ${default_rule_1_enabled}
+    min_value: 0
+    max_value: 1
+    step: 1
+    mode: box
+    web_server:
+      sorting_group_id: grp_rule_2
+      sorting_weight: 1
+  - platform: template
+    name: "Rule 2 Start Minute Of Day"
+    id: rule_1_start_mins
+    optimistic: true
+    restore_value: true
+    initial_value: ${default_rule_1_start_mins}
+    min_value: 0
+    max_value: 1439
+    step: 1
+    mode: box
+    web_server:
+      sorting_group_id: grp_rule_2
+      sorting_weight: 2
+  - platform: template
+    name: "Rule 2 End Minute Of Day"
+    id: rule_1_end_mins
+    optimistic: true
+    restore_value: true
+    initial_value: ${default_rule_1_end_mins}
+    min_value: 0
+    max_value: 1439
+    step: 1
+    mode: box
+    web_server:
+      sorting_group_id: grp_rule_2
+      sorting_weight: 3
+  - platform: template
+    name: "Rule 2 Priority"
+    id: rule_1_priority
+    optimistic: true
+    restore_value: true
+    initial_value: ${default_rule_1_priority}
+    min_value: 1
+    max_value: 99
+    step: 1
+    mode: box
+    web_server:
+      sorting_group_id: grp_rule_2
+      sorting_weight: 4
+  - platform: template
+    name: "Rule 2 Display Mode"
+    id: rule_1_display_mode
+    optimistic: true
+    restore_value: true
+    initial_value: ${default_rule_1_display_mode}
+    min_value: 0
+    max_value: 2
+    step: 1
+    mode: box
+    web_server:
+      sorting_group_id: grp_rule_2
+      sorting_weight: 5
+  - platform: template
+    name: "Rule 2 Green LED"
+    id: rule_1_green
+    optimistic: true
+    restore_value: true
+    initial_value: ${default_rule_1_green}
+    min_value: 0
+    max_value: 1
+    step: 1
+    mode: box
+    web_server:
+      sorting_group_id: grp_rule_2
+      sorting_weight: 6
+  - platform: template
+    name: "Rule 2 Red LED"
+    id: rule_1_red
+    optimistic: true
+    restore_value: true
+    initial_value: ${default_rule_1_red}
+    min_value: 0
+    max_value: 1
+    step: 1
+    mode: box
+    web_server:
+      sorting_group_id: grp_rule_2
+      sorting_weight: 7
+
+  # Rules 3–6 — spare slots (disabled by default) (disabled by default)
+  - platform: template
+    name: "Rule 3 Enabled"
+    id: rule_2_enabled
+    optimistic: true
+    restore_value: true
+    initial_value: "0"
+    min_value: 0
+    max_value: 1
+    step: 1
+    mode: box
+    web_server:
+      sorting_group_id: grp_rule_3
+      sorting_weight: 1
+  - platform: template
+    name: "Rule 3 Start Minute Of Day"
+    id: rule_2_start_mins
+    optimistic: true
+    restore_value: true
+    initial_value: 720
+    min_value: 0
+    max_value: 1439
+    step: 1
+    mode: box
+    web_server:
+      sorting_group_id: grp_rule_3
+      sorting_weight: 2
+  - platform: template
+    name: "Rule 3 End Minute Of Day"
+    id: rule_2_end_mins
+    optimistic: true
+    restore_value: true
+    initial_value: 60
+    min_value: 0
+    max_value: 1439
+    step: 1
+    mode: box
+    web_server:
+      sorting_group_id: grp_rule_3
+      sorting_weight: 3
+  - platform: template
+    name: "Rule 3 Priority"
+    id: rule_2_priority
+    optimistic: true
+    restore_value: true
+    initial_value: "20"
+    min_value: 1
+    max_value: 99
+    step: 1
+    mode: box
+    web_server:
+      sorting_group_id: grp_rule_3
+      sorting_weight: 4
+  - platform: template
+    name: "Rule 3 Display Mode"
+    id: rule_2_display_mode
+    optimistic: true
+    restore_value: true
+    initial_value: "0"
+    min_value: 0
+    max_value: 2
+    step: 1
+    mode: box
+    web_server:
+      sorting_group_id: grp_rule_3
+      sorting_weight: 5
+  - platform: template
+    name: "Rule 3 Green LED"
+    id: rule_2_green
+    optimistic: true
+    restore_value: true
+    initial_value: "0"
+    min_value: 0
+    max_value: 1
+    step: 1
+    mode: box
+    web_server:
+      sorting_group_id: grp_rule_3
+      sorting_weight: 6
+  - platform: template
+    name: "Rule 3 Red LED"
+    id: rule_2_red
+    optimistic: true
+    restore_value: true
+    initial_value: "0"
+    min_value: 0
+    max_value: 1
+    step: 1
+    mode: box
+    web_server:
+      sorting_group_id: grp_rule_3
+      sorting_weight: 7
+
+  - platform: template
+    name: "Rule 4 Enabled"
+    id: rule_3_enabled
+    optimistic: true
+    restore_value: true
+    initial_value: "0"
+    min_value: 0
+    max_value: 1
+    step: 1
+    mode: box
+    web_server:
+      sorting_group_id: grp_rule_4
+      sorting_weight: 1
+  - platform: template
+    name: "Rule 4 Start Minute Of Day"
+    id: rule_3_start_mins
+    optimistic: true
+    restore_value: true
+    initial_value: 720
+    min_value: 0
+    max_value: 1439
+    step: 1
+    mode: box
+    web_server:
+      sorting_group_id: grp_rule_4
+      sorting_weight: 2
+  - platform: template
+    name: "Rule 4 End Minute Of Day"
+    id: rule_3_end_mins
+    optimistic: true
+    restore_value: true
+    initial_value: 60
+    min_value: 0
+    max_value: 1439
+    step: 1
+    mode: box
+    web_server:
+      sorting_group_id: grp_rule_4
+      sorting_weight: 3
+  - platform: template
+    name: "Rule 4 Priority"
+    id: rule_3_priority
+    optimistic: true
+    restore_value: true
+    initial_value: "20"
+    min_value: 1
+    max_value: 99
+    step: 1
+    mode: box
+    web_server:
+      sorting_group_id: grp_rule_4
+      sorting_weight: 4
+  - platform: template
+    name: "Rule 4 Display Mode"
+    id: rule_3_display_mode
+    optimistic: true
+    restore_value: true
+    initial_value: "0"
+    min_value: 0
+    max_value: 2
+    step: 1
+    mode: box
+    web_server:
+      sorting_group_id: grp_rule_4
+      sorting_weight: 5
+  - platform: template
+    name: "Rule 4 Green LED"
+    id: rule_3_green
+    optimistic: true
+    restore_value: true
+    initial_value: "0"
+    min_value: 0
+    max_value: 1
+    step: 1
+    mode: box
+    web_server:
+      sorting_group_id: grp_rule_4
+      sorting_weight: 6
+  - platform: template
+    name: "Rule 4 Red LED"
+    id: rule_3_red
+    optimistic: true
+    restore_value: true
+    initial_value: "0"
+    min_value: 0
+    max_value: 1
+    step: 1
+    mode: box
+    web_server:
+      sorting_group_id: grp_rule_4
+      sorting_weight: 7
+
+  - platform: template
+    name: "Rule 5 Enabled"
+    id: rule_4_enabled
+    optimistic: true
+    restore_value: true
+    initial_value: "0"
+    min_value: 0
+    max_value: 1
+    step: 1
+    mode: box
+    web_server:
+      sorting_group_id: grp_rule_5
+      sorting_weight: 1
+  - platform: template
+    name: "Rule 5 Start Minute Of Day"
+    id: rule_4_start_mins
+    optimistic: true
+    restore_value: true
+    initial_value: 720
+    min_value: 0
+    max_value: 1439
+    step: 1
+    mode: box
+    web_server:
+      sorting_group_id: grp_rule_5
+      sorting_weight: 2
+  - platform: template
+    name: "Rule 5 End Minute Of Day"
+    id: rule_4_end_mins
+    optimistic: true
+    restore_value: true
+    initial_value: 60
+    min_value: 0
+    max_value: 1439
+    step: 1
+    mode: box
+    web_server:
+      sorting_group_id: grp_rule_5
+      sorting_weight: 3
+  - platform: template
+    name: "Rule 5 Priority"
+    id: rule_4_priority
+    optimistic: true
+    restore_value: true
+    initial_value: "20"
+    min_value: 1
+    max_value: 99
+    step: 1
+    mode: box
+    web_server:
+      sorting_group_id: grp_rule_5
+      sorting_weight: 4
+  - platform: template
+    name: "Rule 5 Display Mode"
+    id: rule_4_display_mode
+    optimistic: true
+    restore_value: true
+    initial_value: "0"
+    min_value: 0
+    max_value: 2
+    step: 1
+    mode: box
+    web_server:
+      sorting_group_id: grp_rule_5
+      sorting_weight: 5
+  - platform: template
+    name: "Rule 5 Green LED"
+    id: rule_4_green
+    optimistic: true
+    restore_value: true
+    initial_value: "0"
+    min_value: 0
+    max_value: 1
+    step: 1
+    mode: box
+    web_server:
+      sorting_group_id: grp_rule_5
+      sorting_weight: 6
+  - platform: template
+    name: "Rule 5 Red LED"
+    id: rule_4_red
+    optimistic: true
+    restore_value: true
+    initial_value: "0"
+    min_value: 0
+    max_value: 1
+    step: 1
+    mode: box
+    web_server:
+      sorting_group_id: grp_rule_5
+      sorting_weight: 7
+
+  - platform: template
+    name: "Rule 6 Enabled"
+    id: rule_5_enabled
+    optimistic: true
+    restore_value: true
+    initial_value: "0"
+    min_value: 0
+    max_value: 1
+    step: 1
+    mode: box
+    web_server:
+      sorting_group_id: grp_rule_6
+      sorting_weight: 1
+  - platform: template
+    name: "Rule 6 Start Minute Of Day"
+    id: rule_5_start_mins
+    optimistic: true
+    restore_value: true
+    initial_value: 720
+    min_value: 0
+    max_value: 1439
+    step: 1
+    mode: box
+    web_server:
+      sorting_group_id: grp_rule_6
+      sorting_weight: 2
+  - platform: template
+    name: "Rule 6 End Minute Of Day"
+    id: rule_5_end_mins
+    optimistic: true
+    restore_value: true
+    initial_value: 60
+    min_value: 0
+    max_value: 1439
+    step: 1
+    mode: box
+    web_server:
+      sorting_group_id: grp_rule_6
+      sorting_weight: 3
+  - platform: template
+    name: "Rule 6 Priority"
+    id: rule_5_priority
+    optimistic: true
+    restore_value: true
+    initial_value: "20"
+    min_value: 1
+    max_value: 99
+    step: 1
+    mode: box
+    web_server:
+      sorting_group_id: grp_rule_6
+      sorting_weight: 4
+  - platform: template
+    name: "Rule 6 Display Mode"
+    id: rule_5_display_mode
+    optimistic: true
+    restore_value: true
+    initial_value: "0"
+    min_value: 0
+    max_value: 2
+    step: 1
+    mode: box
+    web_server:
+      sorting_group_id: grp_rule_6
+      sorting_weight: 5
+  - platform: template
+    name: "Rule 6 Green LED"
+    id: rule_5_green
+    optimistic: true
+    restore_value: true
+    initial_value: "0"
+    min_value: 0
+    max_value: 1
+    step: 1
+    mode: box
+    web_server:
+      sorting_group_id: grp_rule_6
+      sorting_weight: 6
+  - platform: template
+    name: "Rule 6 Red LED"
+    id: rule_5_red
+    optimistic: true
+    restore_value: true
+    initial_value: "0"
+    min_value: 0
+    max_value: 1
+    step: 1
+    mode: box
+    web_server:
+      sorting_group_id: grp_rule_6
+      sorting_weight: 7
+
+  # Rule 7 — spare slot (disabled by default)
+  - platform: template
+    name: "Rule 7 Enabled"
+    id: rule_6_enabled
+    optimistic: true
+    restore_value: true
+    initial_value: "0"
+    min_value: 0
+    max_value: 1
+    step: 1
+    mode: box
+    web_server:
+      sorting_group_id: grp_rule_7
+      sorting_weight: 1
+  - platform: template
+    name: "Rule 7 Start Minute Of Day"
+    id: rule_6_start_mins
+    optimistic: true
+    restore_value: true
+    initial_value: 720
+    min_value: 0
+    max_value: 1439
+    step: 1
+    mode: box
+    web_server:
+      sorting_group_id: grp_rule_7
+      sorting_weight: 2
+  - platform: template
+    name: "Rule 7 End Minute Of Day"
+    id: rule_6_end_mins
+    optimistic: true
+    restore_value: true
+    initial_value: 60
+    min_value: 0
+    max_value: 1439
+    step: 1
+    mode: box
+    web_server:
+      sorting_group_id: grp_rule_7
+      sorting_weight: 3
+  - platform: template
+    name: "Rule 7 Priority"
+    id: rule_6_priority
+    optimistic: true
+    restore_value: true
+    initial_value: "20"
+    min_value: 1
+    max_value: 99
+    step: 1
+    mode: box
+    web_server:
+      sorting_group_id: grp_rule_7
+      sorting_weight: 4
+  - platform: template
+    name: "Rule 7 Display Mode"
+    id: rule_6_display_mode
+    optimistic: true
+    restore_value: true
+    initial_value: "0"
+    min_value: 0
+    max_value: 2
+    step: 1
+    mode: box
+    web_server:
+      sorting_group_id: grp_rule_7
+      sorting_weight: 5
+  - platform: template
+    name: "Rule 7 Green LED"
+    id: rule_6_green
+    optimistic: true
+    restore_value: true
+    initial_value: "0"
+    min_value: 0
+    max_value: 1
+    step: 1
+    mode: box
+    web_server:
+      sorting_group_id: grp_rule_7
+      sorting_weight: 6
+  - platform: template
+    name: "Rule 7 Red LED"
+    id: rule_6_red
+    optimistic: true
+    restore_value: true
+    initial_value: "0"
+    min_value: 0
+    max_value: 1
+    step: 1
+    mode: box
+    web_server:
+      sorting_group_id: grp_rule_7
+      sorting_weight: 7
+  # Rule 8 — spare slot (disabled by default)
+  - platform: template
+    name: "Rule 8 Enabled"
+    id: rule_7_enabled
+    optimistic: true
+    restore_value: true
+    initial_value: "0"
+    min_value: 0
+    max_value: 1
+    step: 1
+    mode: box
+    web_server:
+      sorting_group_id: grp_rule_8
+      sorting_weight: 1
+  - platform: template
+    name: "Rule 8 Start Minute Of Day"
+    id: rule_7_start_mins
+    optimistic: true
+    restore_value: true
+    initial_value: 720
+    min_value: 0
+    max_value: 1439
+    step: 1
+    mode: box
+    web_server:
+      sorting_group_id: grp_rule_8
+      sorting_weight: 2
+  - platform: template
+    name: "Rule 8 End Minute Of Day"
+    id: rule_7_end_mins
+    optimistic: true
+    restore_value: true
+    initial_value: 60
+    min_value: 0
+    max_value: 1439
+    step: 1
+    mode: box
+    web_server:
+      sorting_group_id: grp_rule_8
+      sorting_weight: 3
+  - platform: template
+    name: "Rule 8 Priority"
+    id: rule_7_priority
+    optimistic: true
+    restore_value: true
+    initial_value: "20"
+    min_value: 1
+    max_value: 99
+    step: 1
+    mode: box
+    web_server:
+      sorting_group_id: grp_rule_8
+      sorting_weight: 4
+  - platform: template
+    name: "Rule 8 Display Mode"
+    id: rule_7_display_mode
+    optimistic: true
+    restore_value: true
+    initial_value: "0"
+    min_value: 0
+    max_value: 2
+    step: 1
+    mode: box
+    web_server:
+      sorting_group_id: grp_rule_8
+      sorting_weight: 5
+  - platform: template
+    name: "Rule 8 Green LED"
+    id: rule_7_green
+    optimistic: true
+    restore_value: true
+    initial_value: "0"
+    min_value: 0
+    max_value: 1
+    step: 1
+    mode: box
+    web_server:
+      sorting_group_id: grp_rule_8
+      sorting_weight: 6
+  - platform: template
+    name: "Rule 8 Red LED"
+    id: rule_7_red
+    optimistic: true
+    restore_value: true
+    initial_value: "0"
+    min_value: 0
+    max_value: 1
+    step: 1
+    mode: box
+    web_server:
+      sorting_group_id: grp_rule_8
+      sorting_weight: 7
+  # Rule 9 — spare slot (disabled by default)
+  - platform: template
+    name: "Rule 9 Enabled"
+    id: rule_8_enabled
+    optimistic: true
+    restore_value: true
+    initial_value: "0"
+    min_value: 0
+    max_value: 1
+    step: 1
+    mode: box
+    web_server:
+      sorting_group_id: grp_rule_9
+      sorting_weight: 1
+  - platform: template
+    name: "Rule 9 Start Minute Of Day"
+    id: rule_8_start_mins
+    optimistic: true
+    restore_value: true
+    initial_value: 720
+    min_value: 0
+    max_value: 1439
+    step: 1
+    mode: box
+    web_server:
+      sorting_group_id: grp_rule_9
+      sorting_weight: 2
+  - platform: template
+    name: "Rule 9 End Minute Of Day"
+    id: rule_8_end_mins
+    optimistic: true
+    restore_value: true
+    initial_value: 60
+    min_value: 0
+    max_value: 1439
+    step: 1
+    mode: box
+    web_server:
+      sorting_group_id: grp_rule_9
+      sorting_weight: 3
+  - platform: template
+    name: "Rule 9 Priority"
+    id: rule_8_priority
+    optimistic: true
+    restore_value: true
+    initial_value: "20"
+    min_value: 1
+    max_value: 99
+    step: 1
+    mode: box
+    web_server:
+      sorting_group_id: grp_rule_9
+      sorting_weight: 4
+  - platform: template
+    name: "Rule 9 Display Mode"
+    id: rule_8_display_mode
+    optimistic: true
+    restore_value: true
+    initial_value: "0"
+    min_value: 0
+    max_value: 2
+    step: 1
+    mode: box
+    web_server:
+      sorting_group_id: grp_rule_9
+      sorting_weight: 5
+  - platform: template
+    name: "Rule 9 Green LED"
+    id: rule_8_green
+    optimistic: true
+    restore_value: true
+    initial_value: "0"
+    min_value: 0
+    max_value: 1
+    step: 1
+    mode: box
+    web_server:
+      sorting_group_id: grp_rule_9
+      sorting_weight: 6
+  - platform: template
+    name: "Rule 9 Red LED"
+    id: rule_8_red
+    optimistic: true
+    restore_value: true
+    initial_value: "0"
+    min_value: 0
+    max_value: 1
+    step: 1
+    mode: box
+    web_server:
+      sorting_group_id: grp_rule_9
+      sorting_weight: 7
+  # Rule 10 — spare slot (disabled by default)
+  - platform: template
+    name: "Rule 10 Enabled"
+    id: rule_9_enabled
+    optimistic: true
+    restore_value: true
+    initial_value: "0"
+    min_value: 0
+    max_value: 1
+    step: 1
+    mode: box
+    web_server:
+      sorting_group_id: grp_rule_10
+      sorting_weight: 1
+  - platform: template
+    name: "Rule 10 Start Minute Of Day"
+    id: rule_9_start_mins
+    optimistic: true
+    restore_value: true
+    initial_value: 720
+    min_value: 0
+    max_value: 1439
+    step: 1
+    mode: box
+    web_server:
+      sorting_group_id: grp_rule_10
+      sorting_weight: 2
+  - platform: template
+    name: "Rule 10 End Minute Of Day"
+    id: rule_9_end_mins
+    optimistic: true
+    restore_value: true
+    initial_value: 60
+    min_value: 0
+    max_value: 1439
+    step: 1
+    mode: box
+    web_server:
+      sorting_group_id: grp_rule_10
+      sorting_weight: 3
+  - platform: template
+    name: "Rule 10 Priority"
+    id: rule_9_priority
+    optimistic: true
+    restore_value: true
+    initial_value: "20"
+    min_value: 1
+    max_value: 99
+    step: 1
+    mode: box
+    web_server:
+      sorting_group_id: grp_rule_10
+      sorting_weight: 4
+  - platform: template
+    name: "Rule 10 Display Mode"
+    id: rule_9_display_mode
+    optimistic: true
+    restore_value: true
+    initial_value: "0"
+    min_value: 0
+    max_value: 2
+    step: 1
+    mode: box
+    web_server:
+      sorting_group_id: grp_rule_10
+      sorting_weight: 5
+  - platform: template
+    name: "Rule 10 Green LED"
+    id: rule_9_green
+    optimistic: true
+    restore_value: true
+    initial_value: "0"
+    min_value: 0
+    max_value: 1
+    step: 1
+    mode: box
+    web_server:
+      sorting_group_id: grp_rule_10
+      sorting_weight: 6
+  - platform: template
+    name: "Rule 10 Red LED"
+    id: rule_9_red
+    optimistic: true
+    restore_value: true
+    initial_value: "0"
+    min_value: 0
+    max_value: 1
+    step: 1
+    mode: box
+    web_server:
+      sorting_group_id: grp_rule_10
+      sorting_weight: 7
+text:
+  - platform: template
+    name: "Greeting Prefix"
+    id: greeting_prefix
+    optimistic: true
+    restore_value: true
+    initial_value: ${default_greeting_prefix}
+    min_length: 0
+    max_length: 8
+    mode: text
+    web_server:
+      sorting_group_id: grp_display
+      sorting_weight: 3
+
+  # --- Rule 1 (default: wake window) ---
+  - platform: template
+    name: "Rule 1 Message"
+    id: rule_0_message
+    optimistic: true
+    restore_value: true
+    initial_value: ${default_rule_0_message}
+    min_length: 0
+    max_length: ${rule_message_max_length}
+    mode: text
+    web_server:
+      sorting_group_id: grp_rule_1
+      sorting_weight: 10
+
+  - platform: template
+    name: "Rule 2 Message"
+    id: rule_1_message
+    optimistic: true
+    restore_value: true
+    initial_value: ${default_rule_1_message}
+    min_length: 0
+    max_length: ${rule_message_max_length}
+    mode: text
+    web_server:
+      sorting_group_id: grp_rule_2
+      sorting_weight: 10
+
+  - platform: template
+    name: "Rule 3 Message"
+    id: rule_2_message
+    optimistic: true
+    restore_value: true
+    initial_value: ""
+    min_length: 0
+    max_length: ${rule_message_max_length}
+    mode: text
+    web_server:
+      sorting_group_id: grp_rule_3
+      sorting_weight: 10
+
+  - platform: template
+    name: "Rule 4 Message"
+    id: rule_3_message
+    optimistic: true
+    restore_value: true
+    initial_value: ""
+    min_length: 0
+    max_length: ${rule_message_max_length}
+    mode: text
+    web_server:
+      sorting_group_id: grp_rule_4
+      sorting_weight: 10
+
+  - platform: template
+    name: "Rule 5 Message"
+    id: rule_4_message
+    optimistic: true
+    restore_value: true
+    initial_value: ""
+    min_length: 0
+    max_length: ${rule_message_max_length}
+    mode: text
+    web_server:
+      sorting_group_id: grp_rule_5
+      sorting_weight: 10
+
+  - platform: template
+    name: "Rule 6 Message"
+    id: rule_5_message
+    optimistic: true
+    restore_value: true
+    initial_value: ""
+    min_length: 0
+    max_length: ${rule_message_max_length}
+    mode: text
+    web_server:
+      sorting_group_id: grp_rule_6
+      sorting_weight: 10
+
+  - platform: template
+    name: "Rule 7 Message"
+    id: rule_6_message
+    optimistic: true
+    restore_value: true
+    initial_value: ""
+    min_length: 0
+    max_length: ${rule_message_max_length}
+    mode: text
+    web_server:
+      sorting_group_id: grp_rule_7
+      sorting_weight: 10
+  - platform: template
+    name: "Rule 8 Message"
+    id: rule_7_message
+    optimistic: true
+    restore_value: true
+    initial_value: ""
+    min_length: 0
+    max_length: ${rule_message_max_length}
+    mode: text
+    web_server:
+      sorting_group_id: grp_rule_8
+      sorting_weight: 10
+  - platform: template
+    name: "Rule 9 Message"
+    id: rule_8_message
+    optimistic: true
+    restore_value: true
+    initial_value: ""
+    min_length: 0
+    max_length: ${rule_message_max_length}
+    mode: text
+    web_server:
+      sorting_group_id: grp_rule_9
+      sorting_weight: 10
+  - platform: template
+    name: "Rule 10 Message"
+    id: rule_9_message
+    optimistic: true
+    restore_value: true
+    initial_value: ""
+    min_length: 0
+    max_length: ${rule_message_max_length}
+    mode: text
+    web_server:
+      sorting_group_id: grp_rule_10
+      sorting_weight: 10
+script:
+  - id: update_schedule_state
+    mode: restart
+    then:
+      - lambda: |-
+          auto in_rule_period = [](int current_mins, int start_mins, int end_mins) -> bool {
+            if (start_mins == end_mins) {
+              return current_mins == start_mins;
+            }
+            if (start_mins < end_mins) {
+              return current_mins >= start_mins && current_mins < end_mins;
+            }
+            return current_mins >= start_mins || current_mins < end_mins;
+          };
+
+          struct RuleState {
+            bool enabled;
+            int start_mins;
+            int end_mins;
+            int priority;
+            int display_mode;
+            bool green_on;
+            bool red_on;
+          };
+
+          auto load_rule = [&](int index, RuleState &rule) -> void {
+            rule.enabled = false;
+            rule.start_mins = 0;
+            rule.end_mins = 0;
+            rule.priority = 99;
+            rule.display_mode = 0;
+            rule.green_on = false;
+            rule.red_on = false;
+            switch (index) {
+              case 0:
+                rule.enabled = id(rule_0_enabled).state > 0;
+                rule.start_mins = (int) id(rule_0_start_mins).state;
+                rule.end_mins = (int) id(rule_0_end_mins).state;
+                rule.priority = (int) id(rule_0_priority).state;
+                rule.display_mode = (int) id(rule_0_display_mode).state;
+                rule.green_on = id(rule_0_green).state > 0;
+                rule.red_on = id(rule_0_red).state > 0;
+                break;
+              case 1:
+                rule.enabled = id(rule_1_enabled).state > 0;
+                rule.start_mins = (int) id(rule_1_start_mins).state;
+                rule.end_mins = (int) id(rule_1_end_mins).state;
+                rule.priority = (int) id(rule_1_priority).state;
+                rule.display_mode = (int) id(rule_1_display_mode).state;
+                rule.green_on = id(rule_1_green).state > 0;
+                rule.red_on = id(rule_1_red).state > 0;
+                break;
+              case 2:
+                rule.enabled = id(rule_2_enabled).state > 0;
+                rule.start_mins = (int) id(rule_2_start_mins).state;
+                rule.end_mins = (int) id(rule_2_end_mins).state;
+                rule.priority = (int) id(rule_2_priority).state;
+                rule.display_mode = (int) id(rule_2_display_mode).state;
+                rule.green_on = id(rule_2_green).state > 0;
+                rule.red_on = id(rule_2_red).state > 0;
+                break;
+              case 3:
+                rule.enabled = id(rule_3_enabled).state > 0;
+                rule.start_mins = (int) id(rule_3_start_mins).state;
+                rule.end_mins = (int) id(rule_3_end_mins).state;
+                rule.priority = (int) id(rule_3_priority).state;
+                rule.display_mode = (int) id(rule_3_display_mode).state;
+                rule.green_on = id(rule_3_green).state > 0;
+                rule.red_on = id(rule_3_red).state > 0;
+                break;
+              case 4:
+                rule.enabled = id(rule_4_enabled).state > 0;
+                rule.start_mins = (int) id(rule_4_start_mins).state;
+                rule.end_mins = (int) id(rule_4_end_mins).state;
+                rule.priority = (int) id(rule_4_priority).state;
+                rule.display_mode = (int) id(rule_4_display_mode).state;
+                rule.green_on = id(rule_4_green).state > 0;
+                rule.red_on = id(rule_4_red).state > 0;
+                break;
+              case 5:
+                rule.enabled = id(rule_5_enabled).state > 0;
+                rule.start_mins = (int) id(rule_5_start_mins).state;
+                rule.end_mins = (int) id(rule_5_end_mins).state;
+                rule.priority = (int) id(rule_5_priority).state;
+                rule.display_mode = (int) id(rule_5_display_mode).state;
+                rule.green_on = id(rule_5_green).state > 0;
+                rule.red_on = id(rule_5_red).state > 0;
+                break;
+              case 6:
+                rule.enabled = id(rule_6_enabled).state > 0;
+                rule.start_mins = (int) id(rule_6_start_mins).state;
+                rule.end_mins = (int) id(rule_6_end_mins).state;
+                rule.priority = (int) id(rule_6_priority).state;
+                rule.display_mode = (int) id(rule_6_display_mode).state;
+                rule.green_on = id(rule_6_green).state > 0;
+                rule.red_on = id(rule_6_red).state > 0;
+                break;
+              case 7:
+                rule.enabled = id(rule_7_enabled).state > 0;
+                rule.start_mins = (int) id(rule_7_start_mins).state;
+                rule.end_mins = (int) id(rule_7_end_mins).state;
+                rule.priority = (int) id(rule_7_priority).state;
+                rule.display_mode = (int) id(rule_7_display_mode).state;
+                rule.green_on = id(rule_7_green).state > 0;
+                rule.red_on = id(rule_7_red).state > 0;
+                break;
+              case 8:
+                rule.enabled = id(rule_8_enabled).state > 0;
+                rule.start_mins = (int) id(rule_8_start_mins).state;
+                rule.end_mins = (int) id(rule_8_end_mins).state;
+                rule.priority = (int) id(rule_8_priority).state;
+                rule.display_mode = (int) id(rule_8_display_mode).state;
+                rule.green_on = id(rule_8_green).state > 0;
+                rule.red_on = id(rule_8_red).state > 0;
+                break;
+              case 9:
+                rule.enabled = id(rule_9_enabled).state > 0;
+                rule.start_mins = (int) id(rule_9_start_mins).state;
+                rule.end_mins = (int) id(rule_9_end_mins).state;
+                rule.priority = (int) id(rule_9_priority).state;
+                rule.display_mode = (int) id(rule_9_display_mode).state;
+                rule.green_on = id(rule_9_green).state > 0;
+                rule.red_on = id(rule_9_red).state > 0;
+                break;
+            }
+          };
+
+          int current_mins = 0;
+          if (id(test_mode).state) {
+            int wake_start = (int) id(rule_0_start_mins).state;
+            int wake_end = (int) id(rule_0_end_mins).state;
+            int sleep_start = (int) id(rule_1_start_mins).state;
+            int sleep_end = (int) id(rule_1_end_mins).state;
+            switch (id(test_scenario_index)) {
+              case 0:
+                current_mins = sleep_start + (sleep_end - sleep_start + 1440) % 1440 / 2;
+                current_mins = current_mins % 1440;
+                break;
+              case 1:
+                current_mins = (sleep_start - 15 + 1440) % 1440;
+                break;
+              case 2:
+                current_mins = (wake_start - 15 + 1440) % 1440;
+                break;
+              case 3:
+                current_mins = (wake_end + 180) % 1440;
+                break;
+              case 4:
+                current_mins = (wake_start + 45) % 1440;
+                break;
+              default:
+                current_mins = (wake_end + 180) % 1440;
+            }
+            id(sched_valid) = true;
+          } else {
+            auto now = id(clock_time).now();
+            if (!now.is_valid()) {
+              id(sched_valid) = false;
+              return;
+            }
+            current_mins = now.hour * 60 + now.minute;
+            id(sched_valid) = true;
+          }
+
+          id(sched_mins) = current_mins;
+          id(sched_hour) = current_mins / 60;
+          id(sched_minute) = current_mins % 60;
+
+          int best_rule = -1;
+          int best_priority = 1000;
+          RuleState best{};
+          for (int i = 0; i < 10; i++) {
+            RuleState rule{};
+            load_rule(i, rule);
+            if (!rule.enabled) {
+              continue;
+            }
+            if (!in_rule_period(current_mins, rule.start_mins, rule.end_mins)) {
+              continue;
+            }
+            if (rule.priority < best_priority) {
+              best_priority = rule.priority;
+              best_rule = i;
+              best = rule;
+            }
+          }
+
+          id(sched_active_rule) = best_rule;
+          if (best_rule >= 0) {
+            id(sched_display_mode) = best.display_mode;
+            id(sched_green_on) = best.green_on;
+            id(sched_red_on) = best.red_on;
+          } else {
+            id(sched_display_mode) = -1;
+            id(sched_green_on) = false;
+            id(sched_red_on) = false;
+          }
+
+  - id: update_signal_leds
+    mode: restart
+    then:
+      - lambda: |-
+          if (!id(sched_valid)) {
+            id(green_led).turn_off();
+            id(red_led).turn_off();
+            return;
+          }
+          if (id(sched_green_on)) {
+            id(green_led).turn_on();
+          } else {
+            id(green_led).turn_off();
+          }
+          if (id(sched_red_on)) {
+            id(red_led).turn_on();
+          } else {
+            id(red_led).turn_off();
+          }
