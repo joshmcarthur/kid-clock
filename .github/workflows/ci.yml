@@ -1,0 +1,77 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+    tags: ["v*"]
+  pull_request:
+
+jobs:
+  web:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run build
+      - name: Verify committed web assets match build
+        run: git diff --exit-code kid-clock-app.js kid-clock-app.css
+
+  firmware:
+    needs: web
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Create CI secrets
+        run: |
+          cat > secrets.yaml <<'EOF'
+          wifi_ssid: "ci"
+          wifi_password: "ci"
+          api_encryption_key: "dGVzdGtleXRlc3RrZXl0ZXN0a2V5dGVzdGtleXRlc3Q="
+          EOF
+      - uses: esphome/build-action@v7.3.0
+        with:
+          yaml-file: kid-clock.yaml
+          version: latest
+
+  release:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: [web, firmware]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - name: Create CI secrets
+        run: |
+          cat > secrets.yaml <<'EOF'
+          wifi_ssid: "ci"
+          wifi_password: "ci"
+          api_encryption_key: "dGVzdGtleXRlc3RrZXl0ZXN0a2V5dGVzdGtleXRlc3Q="
+          EOF
+      - uses: esphome/build-action@v7.3.0
+        id: esphome-build
+        with:
+          yaml-file: kid-clock.yaml
+          version: latest
+          complete-manifest: true
+          release-summary: "Kid Clock firmware release"
+          release-url: ${{ github.server_url }}/${{ github.repository }}/releases/tag/${{ github.ref_name }}
+      - name: Prepare release assets
+        run: |
+          mkdir -p release-assets
+          cp kid-clock-app.js kid-clock-app.css release-assets/
+          cp -r "${{ steps.esphome-build.outputs.name }}"/* release-assets/
+      - uses: softprops/action-gh-release@v3
+        with:
+          files: release-assets/*
