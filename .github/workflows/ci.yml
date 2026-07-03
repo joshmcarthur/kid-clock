@@ -27,12 +27,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7
       - name: Create CI secrets
-        run: |
-          cat > secrets.yaml <<'EOF'
-          wifi_ssid: "ci"
-          wifi_password: "ci"
-          api_encryption_key: "dGVzdGtleXRlc3RrZXl0ZXN0a2V5dGVzdGtleXRlc3Q="
-          EOF
+        run: cp secrets.yaml.example secrets.yaml
       - uses: esphome/build-action@v7.3.0
         with:
           yaml-file: kid-clock.yaml
@@ -53,12 +48,7 @@ jobs:
       - run: npm ci
       - run: npm run build
       - name: Create CI secrets
-        run: |
-          cat > secrets.yaml <<'EOF'
-          wifi_ssid: "ci"
-          wifi_password: "ci"
-          api_encryption_key: "dGVzdGtleXRlc3RrZXl0ZXN0a2V5dGVzdGtleXRlc3Q="
-          EOF
+        run: cp secrets.yaml.example secrets.yaml
       - uses: esphome/build-action@v7.3.0
         id: esphome-build
         with:
